@@ -1,2 +1,2 @@
 blue - #00BAFF,rgb(0, 186, 255)
-green - #03D45D, rgb(3, 212, 93)
+green - #03D45D, rgb(3, 212, 93)   , hover: rgb(0, 187, 81);

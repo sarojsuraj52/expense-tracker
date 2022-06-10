@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useState,useContext } from "react";
+import { useHistory } from "react-router-dom";
 import classes from "./Signup.module.css";
-// import axios from "axios";
+import AuthContext from "../store/auth-context";
 
 const Signup = () => {
   const [input, setInput] = useState({
@@ -10,6 +11,8 @@ const Signup = () => {
   });
   const [passwordMatched, setPasswordMatched] = useState(true);
   const [login, setLogin] = useState(true);
+  const authctx = useContext(AuthContext)
+  const history = useHistory()
 
   const toggleAuthMode = () => {
     setLogin((prevSate) => !prevSate);
@@ -59,6 +62,10 @@ const Signup = () => {
       });
       const data = await res.json();
       if (res.ok) {
+        authctx.login(data.idToken)
+        if(login){
+          history.replace('/home')
+        }
         alert(`${login ? "Login" : "Sign Up"} Successful`);
         setInput({
           email: "",
@@ -95,7 +102,7 @@ const Signup = () => {
           value={input.email}
           placeholder="Email"
           onChange={onChangeHandler}
-          // required
+          required
         />
         <input
           type="password"
@@ -103,7 +110,7 @@ const Signup = () => {
           value={input.password}
           placeholder="Password"
           onChange={onChangeHandler}
-          // required
+          required
         />
         {!login && (
           <input
@@ -112,7 +119,7 @@ const Signup = () => {
             value={input.cpassword}
             placeholder="Confirm Password"
             onChange={onChangeHandler}
-            // required
+            required
           />
         )}
         {!passwordMatched && !login && (
