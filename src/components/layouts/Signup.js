@@ -9,6 +9,11 @@ const Signup = () => {
     cpassword: "",
   });
   const [passwordMatched, setPasswordMatched] = useState(true);
+  const [login, setLogin] = useState(true);
+
+  const toggleAuthMode = () => {
+    setLogin((prevSate) => !prevSate);
+  };
 
   const onChangeHandler = (e) => {
     const { name, value } = e.target;
@@ -18,60 +23,79 @@ const Signup = () => {
         [name]: value,
       };
     });
-
-};
+  };
 
   const submitHandler = (e) => {
     e.preventDefault();
-   if(input.password !== input.cpassword){
-        setPasswordMatched(false)
-        console.log('wrong',passwordMatched)
+
+    let url;
+    if (login) {
+      url =
+        "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=AIzaSyC54AeoVNHqweF0xmPJ4zAFA0N1EcBM_Gw";
+      signingIn();
+    } else {
+      url =
+        "https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=AIzaSyC54AeoVNHqweF0xmPJ4zAFA0N1EcBM_Gw";
+
+      if (input.password !== input.cpassword) {
+        setPasswordMatched(false);
+      } else {
+        setPasswordMatched(true);
+        signingIn();
+      }
     }
-    else{
-        setPasswordMatched(true)
-        signingIn()
+
+    async function signingIn() {
+      const res = await fetch(url, {
+        method: "POST",
+        body: JSON.stringify({
+          email: input.email,
+          password: input.password,
+          returnSecureToken: true,
+        }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      const data = await res.json();
+      if (res.ok) {
+        alert(`${login ? "Login" : "Sign Up"} Successful`);
+        setInput({
+          email: "",
+          password: "",
+          cpassword: "",
+        });
+      } else {
+        let errorMsg = `${login ? "Login" : "Sign Up"} Failed`;
+        if (data && data.error && data.error.message) {
+          errorMsg = data.error.message;
+        }
+        alert(errorMsg);
+      }
     }
   };
 
-  async function signingIn(){
-    const res = await fetch('https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=AIzaSyC54AeoVNHqweF0xmPJ4zAFA0N1EcBM_Gw',{
-        method:'POST',
-        body:JSON.stringify({
-            email:input.email,
-            password:input.password,
-            returnSecureToken:true
-        }),
-        headers:{
-            "Content-Type": "application/json",
-            }
-    })
+  // const res = await axios({
+  //     method:'post',
+  //     url:'https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=AIzaSyC54AeoVNHqweF0xmPJ4zAFA0N1EcBM_Gw',
+  //     data:{
+  //         email:input.email,
+  //         password:input.password,
+  //         returnSecureToken:true
+  //     }
+  // })
 
-    // const res = await axios({
-    //     method:'post',
-    //     url:'https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=AIzaSyC54AeoVNHqweF0xmPJ4zAFA0N1EcBM_Gw',
-    //     data:{
-    //         email:input.email,
-    //         password:input.password,
-    //         returnSecureToken:true
-    //     }
-    // })
-
-    const data =  await res.json();
-    console.log('data',data.error.message)
-  }
-
- 
   return (
     <div className={classes["signup-container"]}>
       <form onSubmit={submitHandler} className={classes.signup}>
-        <span className={classes.heading}>Sign Up</span>
+        <span className={classes.heading}>{login ? "Login" : "Sign Up"}</span>
         <input
           type="email"
           name="email"
           value={input.email}
           placeholder="Email"
           onChange={onChangeHandler}
-          required
+          // required
         />
         <input
           type="password"
@@ -79,26 +103,30 @@ const Signup = () => {
           value={input.password}
           placeholder="Password"
           onChange={onChangeHandler}
-          required
+          // required
         />
-        <input
-          type="password"
-          name="cpassword"
-          value={input.cpassword}
-          placeholder="Confirm Password"
-          onChange={onChangeHandler}
-          required
-        />
-        {!passwordMatched &&<span className={classes.error}>Password didn't match</span>}
-        <button
-          type="submit"
-          className={classes["signup-btn"]}
-        >
-          Sign Up <span>▶</span>
+        {!login && (
+          <input
+            type="password"
+            name="cpassword"
+            value={input.cpassword}
+            placeholder="Confirm Password"
+            onChange={onChangeHandler}
+            // required
+          />
+        )}
+        {!passwordMatched && !login && (
+          <span className={classes.error}>Password didn't match</span>
+        )}
+        <button type="submit" className={classes["signup-btn"]}>
+          {login ? "Login" : "Sign Up"} <span>▶</span>
         </button>
         <div>
           <span>
-            Have an account? <a href="#login">Login</a>{" "}
+            {login ? "Create an account" : "Have an account"}?
+            <span onClick={toggleAuthMode} className={classes.loginToggle}>
+              {login ? " Sign Up" : " Login"}
+            </span>
           </span>
         </div>
       </form>
