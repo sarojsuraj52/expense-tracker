@@ -3,7 +3,7 @@ import AuthContext from "../store/auth-context";
 import classes from "./Home.module.css";
 
 const Home = () => {
-    const [completeBtnClicked,setCompleteBtnCLicked] = useState(true)
+    const [completeBtnClicked,setCompleteBtnCLicked] = useState(false)
     const nameRef = useRef()
     const photoUrlRef = useRef()
     const authctx = useContext(AuthContext)
