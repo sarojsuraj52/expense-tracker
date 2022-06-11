@@ -1,12 +1,43 @@
-import React,{useState,useRef,useContext} from "react";
+import React,{useState,useContext,useEffect,useCallback} from "react";
 import AuthContext from "../store/auth-context";
 import classes from "./Home.module.css";
 
 const Home = () => {
     const [completeBtnClicked,setCompleteBtnCLicked] = useState(false)
-    const nameRef = useRef()
-    const photoUrlRef = useRef()
     const authctx = useContext(AuthContext)
+    const [initialData,SetInitialData] = useState('')
+
+    const getData = useCallback( async() =>{
+      const res = await fetch('https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=AIzaSyC54AeoVNHqweF0xmPJ4zAFA0N1EcBM_Gw',{
+        method:'post',
+        body:JSON.stringify({
+            idToken:authctx.token,
+        })
+      })
+      const data = await res.json()
+      SetInitialData(data)
+    },[authctx.token])
+
+    useEffect(()=>{
+      getData()
+    },[getData])
+
+    let initialName =''
+    let initialPhotoUrl =''
+    if(initialData.users !== undefined){
+      initialName= initialData.users[0].displayName
+      initialPhotoUrl= initialData.users[0].photoUrl
+    }
+    // console.log('initialData',initialName,initialPhotoUrl)
+    const [input,setInput] = useState({
+      name:`${initialName}`,
+      photoUrl:initialPhotoUrl
+    }) 
+    useEffect(() => { setInput({
+      name:initialName,
+      photoUrl:initialPhotoUrl
+    })}, [initialName,initialPhotoUrl] )
+   
     const showProfileForm = (event)=>{
         event.preventDefault();
         setCompleteBtnCLicked(true)
@@ -16,10 +47,21 @@ const Home = () => {
         setCompleteBtnCLicked(false)
     }
 
+   
+
+    const changeHandler = (e)=>{
+      const {name,value} = e.target;
+      setInput(prevInput=>{
+        return{
+          ...prevInput,
+          [name]:value}
+      })
+    }
+
     const submitHandler = async(e)=>{
         e.preventDefault()
-        const enteredFname = nameRef.current.value;
-        const enteredPhotoUrl = photoUrlRef.current.value;
+        const enteredFname = input.name;
+        const enteredPhotoUrl = input.photoUrl;
         const res = await fetch('https://identitytoolkit.googleapis.com/v1/accounts:update?key=AIzaSyC54AeoVNHqweF0xmPJ4zAFA0N1EcBM_Gw',{
             method:'post',
             body:JSON.stringify({
@@ -51,10 +93,10 @@ const Home = () => {
       {completeBtnClicked &&<section className={classes['form-container']}>
         <form onSubmit={submitHandler} className={classes.profileForm}>
           <span>Contact Details</span>
-          <label htmlFor="fname">Fullname</label>
-          <input type='text' name='fname' id='fname' ref={nameRef} required/>
-          <label htmlFor="url">Profile Photo URL</label>
-          <input type='text' name='url' id='url' ref={photoUrlRef} required/>
+          <label htmlFor="name">Fullname</label>
+          <input type='text' name='name' id='name' onChange={changeHandler} value={input.name}   required/>
+          <label htmlFor="photoUrl">Profile Photo URL</label>
+          <input type='text' name='photoUrl' id='photoUrl' onChange={changeHandler} value={input.photoUrl}  required/>
           <button  className={classes['update-btn']} type="submit">Update</button>
           <button className={classes['cancel-btn']} onClick={hideProfileForm}>Cancel</button>
         </form>
