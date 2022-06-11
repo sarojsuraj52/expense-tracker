@@ -3,6 +3,7 @@ import { Route, Switch, Redirect } from "react-router-dom";
 import "./App.css";
 import Header from "./components/layouts/Header";
 import Signup from "./components/layouts/Signup";
+import Expenses from "./components/pages/Expenses";
 import Home from "./components/pages/Home";
 import AuthContext from "./components/store/auth-context";
 function App() {
@@ -18,6 +19,10 @@ function App() {
         </Route>
         <Route path="/home">
           {isLoggedin && <Home />}
+          {!isLoggedin && <Redirect to='/auth' />}
+        </Route>
+        <Route path='/expenses'>
+          {isLoggedin && <Expenses />}
           {!isLoggedin && <Redirect to='/auth' />}
         </Route>
         <Route path="*">

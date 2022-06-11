@@ -17,11 +17,11 @@ const Header = () => {
             Home
           </NavLink>
         </li>
-        {/* <li>
-          <NavLink activeClassName={classes.active} to="/auth">
-            Auth
+        <li>
+          <NavLink activeClassName={classes.active} to="/expenses">
+            Expenses
           </NavLink>
-        </li> */}
+        </li>
       </ul>
       <div className={classes.action}>
         {!isLoggedin && <NavLink to='/auth'><button>Login</button></NavLink>}

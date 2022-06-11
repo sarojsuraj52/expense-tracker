@@ -1,5 +1,5 @@
 import React, { useState, useContext } from "react";
-import { useHistory } from "react-router-dom";
+// import { useHistory } from "react-router-dom";
 import classes from "./Signup.module.css";
 import AuthContext from "../store/auth-context";
 
@@ -13,7 +13,7 @@ const Signup = () => {
   const [login, setLogin] = useState(true);
   const [isForgotPassword, setIsForgotPassword] = useState(false);
   const authctx = useContext(AuthContext);
-  const history = useHistory();
+  // const history = useHistory();
 
   const toggleAuthMode = () => {
     setLogin((prevSate) => !prevSate);
@@ -79,7 +79,7 @@ const Signup = () => {
          body: JSON.stringify({
              email: input.email,
              password: input.password,
-             returnSecureToken: false,
+             returnSecureToken: true,
          }),
          headers: {
            "Content-Type": "application/json",
@@ -88,7 +88,9 @@ const Signup = () => {
       }
       const data = await res.json();
       if (res.ok) {
-        authctx.login(data.idToken);
+        if(login){
+          authctx.login(data.idToken);
+        }
         
         if(isForgotPassword){
           alert('Check you email')

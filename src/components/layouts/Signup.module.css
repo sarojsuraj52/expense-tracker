@@ -22,6 +22,7 @@
   border: 2px solid rgb(0, 186, 255);
   padding: 1rem;
   background-color: white;
+  transition: all 1s linear;
 }
 
 .signup button {

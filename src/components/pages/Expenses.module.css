@@ -1,0 +1,82 @@
+.expenses-container {
+  margin: 5rem 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.expenses-form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 20rem;
+  margin: 0 2rem;
+  border-radius: 12px;
+  border: 2px solid rgb(0, 186, 255);
+  padding: 2rem;
+  background-color: white;
+}
+
+.expenses-form .heading {
+  font-size: 1.4rem;
+  margin-bottom: 1.7rem;
+  font-weight: 600;
+  text-align: center;
+}
+.expenses-form input,
+textarea,
+select {
+  width: 100%;
+  height: 1.8rem;
+  border-radius: 5px;
+  outline: none;
+  padding: 0 5px;
+  border: 1px solid grey;
+  transition: all 0.3s;
+  margin-bottom: 1rem;
+}
+
+.expenses-form textarea {
+  padding: 5px;
+  height: 3rem;
+}
+.expenses-form select:focus {
+  border: 1px solid rgb(0, 186, 255);
+}
+.expenses-form input:focus {
+  border: 1px solid rgb(0, 186, 255);
+}
+.expenses-form textarea:focus {
+  border: 1px solid rgb(0, 186, 255);
+}
+
+.expenses-form label {
+  margin-bottom: 0.5rem;
+  display: block;
+  text-align: left !important;
+  align-self: flex-start;
+  font-weight: 500;
+}
+.expenses-form .expenses-submit-btn {
+  width: 100%;
+  border-radius: 5px;
+  margin: 1rem 0;
+  padding: 0.65rem 1rem;
+  font-weight: bold;
+  background-image: linear-gradient(32deg, rgb(0, 186, 255), rgb(3, 212, 93));
+  border: none;
+  cursor: pointer;
+  color: white;
+}
+.expenses-form .expenses-submit-btn:hover {
+  background-image: linear-gradient(200deg, rgb(0, 186, 255), rgb(3, 212, 93));
+}
+.expenses-form button span {
+  opacity: 0;
+  margin-left: -0.4rem;
+  transition: all 0.15s ease-in-out;
+}
+.expenses-form button:hover > span{
+    opacity: 1;
+    margin-left: 0rem;
+}
