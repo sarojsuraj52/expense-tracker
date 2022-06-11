@@ -107,7 +107,6 @@ const Home = () => {
     })
     const data = await res.json()
     if(res.ok){
-      // console.log(res)
       alert('Please check your email for verification')
     }
     else{

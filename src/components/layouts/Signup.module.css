@@ -79,3 +79,11 @@
   font-weight: bold;
   cursor: pointer;
 }
+
+.forgot-btn{
+  background: none !important;
+  background-color: transparent !important;
+  color:rgb(0, 186, 255) !important;
+  font-weight: 700 !important;
+
+}
