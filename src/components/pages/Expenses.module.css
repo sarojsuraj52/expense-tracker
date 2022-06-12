@@ -9,8 +9,8 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  width: 20rem;
-  margin: 0 2rem;
+  width: 80%;
+  max-width: 500px;
   border-radius: 12px;
   border: 2px solid rgb(0, 186, 255);
   padding: 2rem;
@@ -79,4 +79,16 @@ select {
 .expenses-form button:hover > span{
     opacity: 1;
     margin-left: 0rem;
+}
+.expenses-data-container{
+  background-color:  rgb(0, 186, 255);
+  padding: 20px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  justify-content: center;
+  width: 100%;
+  max-width:540px;
+  margin: 2rem 0;
 }

@@ -89,7 +89,7 @@ const Signup = () => {
       const data = await res.json();
       if (res.ok) {
         if(login){
-          authctx.login(data.idToken);
+          authctx.login(data.idToken,input.email);
         }
         
         if(isForgotPassword){

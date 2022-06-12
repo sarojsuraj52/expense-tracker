@@ -1,13 +1,50 @@
-import React, { useState } from "react";
+import React, { useState,useContext,useEffect,useCallback } from "react";
+import ExpenseItems from "./ExpenseItems";
 import classes from "./Expenses.module.css";
-
-const Expenses = () => {
+import AuthContext from "../store/auth-context";
+const Expenses = (props) => {
   const [expenseInput, setExpenseInput] = useState({
     amount: "",
     description: "",
     category: "",
   });
+  const [expensesData,setExpensesData] = useState([])
 
+  const authctx = useContext(AuthContext)
+  let email;
+  if (authctx.email !== null) {
+    email = authctx.email.replace(/[@.]/g, "");
+  }
+
+  const getData = useCallback(async()=>{
+    try{const res = await fetch(`https://expense-tracker-7faf8-default-rtdb.firebaseio.com/expense${email}.json`)
+    
+    const data = await res.json()
+    if(res.ok){
+      let dataArr = []
+      if(data !== null){
+        dataArr = Object.entries(data)
+      }
+      setExpensesData(dataArr)
+    }
+    else{
+      let errMsg = `Can't get expense`
+      if(data && data.error && data.error.message){
+        errMsg = data.error.message
+      }
+      throw new Error(errMsg)
+    }
+  }
+    catch(err){
+      alert(err)
+    }
+  },[email])
+
+  useEffect(()=>{
+    getData()
+  },[getData])
+
+  
   const changeHandler = (e) => {
     const { name, value } = e.target;
     setExpenseInput((prevInput) => {
@@ -17,15 +54,51 @@ const Expenses = () => {
       };
     });
   };
-  const submitHandler = (e) => {
+
+  let expenses
+  const submitHandler = async(e) => {
     e.preventDefault();
-    const expenseData = {
+    const enteredExpenseData = {
       amount: expenseInput.amount,
       description: expenseInput.description,
       category: expenseInput.category,
     };
-    console.log(expenseData)
+
+
+    try{
+      const res = await fetch(`https://expense-tracker-7faf8-default-rtdb.firebaseio.com/expense${email}.json`,{
+      method:'post',
+      body:JSON.stringify(enteredExpenseData),
+      headers:{
+        'Content-Type':'application/json'
+      }
+    })
+    const data = await res.json()
+
+    if(res.ok){
+      alert('Expense added')
+      getData()
+    }
+    else{
+      let errMsg = `Can't add expense`
+      if(data && data.error && data.error.message){
+        errMsg = data.error.message
+      }
+      throw new Error(errMsg)
+    }
+  }
+    catch(err){
+      alert(err)
+    }
   };
+  
+  if(expensesData.length !== 0){
+    expenses = expensesData.map((item)=>(
+     <ExpenseItems key={item[0]} amount={item[1].amount} description={item[1].description} category ={item[1].category} />
+   ))
+  }
+  
+
   return (
     <section className={classes["expenses-container"]}>
       <form onSubmit={submitHandler} className={classes["expenses-form"]}>
@@ -62,6 +135,9 @@ const Expenses = () => {
           Submit<span> ▶</span>
         </button>
       </form>
+      {expensesData.length>0 && <div className={classes['expenses-data-container']}>
+      {expenses}
+      </div>}
     </section>
   );
 };
