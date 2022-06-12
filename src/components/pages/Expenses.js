@@ -9,6 +9,8 @@ const Expenses = (props) => {
     category: "",
   });
   const [expensesData,setExpensesData] = useState([])
+  const [isEdit,setIsEdit]= useState(false)
+  const [editId,setEditId] = useState('')
 
   const authctx = useContext(AuthContext)
   let email;
@@ -54,8 +56,22 @@ const Expenses = (props) => {
       };
     });
   };
+  
+  const editHandler = async(id)=>{
+    setIsEdit(true)
+    let editData
+    if(expensesData.length !== 0){
+      editData = expensesData.find(item=>(item[0]===id))
+    }
+    setExpenseInput({
+      amount: editData[1].amount,
+      description: editData[1].description,
+      category: editData[1].category,
+    })
+    setEditId(id)
+  }
 
-  let expenses
+  
   const submitHandler = async(e) => {
     e.preventDefault();
     const enteredExpenseData = {
@@ -66,18 +82,36 @@ const Expenses = (props) => {
 
 
     try{
-      const res = await fetch(`https://expense-tracker-7faf8-default-rtdb.firebaseio.com/expense${email}.json`,{
-      method:'post',
-      body:JSON.stringify(enteredExpenseData),
-      headers:{
-        'Content-Type':'application/json'
+      let res,data;
+      if(isEdit === true){
+        res = await fetch(`https://expense-tracker-7faf8-default-rtdb.firebaseio.com/expense${email}/${editId}.json`,{
+          method:'put',
+          body:JSON.stringify(enteredExpenseData),
+          headers:{
+            'Content-Type':'application/json'
+          }
+        })
       }
-    })
-    const data = await res.json()
+      else{
+        res = await fetch(`https://expense-tracker-7faf8-default-rtdb.firebaseio.com/expense${email}.json`,{
+          method:'post',
+          body:JSON.stringify(enteredExpenseData),
+          headers:{
+            'Content-Type':'application/json'
+          }
+        })
+      }
+     data = await res.json()
 
     if(res.ok){
-      alert('Expense added')
+      alert(`${isEdit?'Expense Updated':'Expenses Added'}`)
       getData()
+      setIsEdit(false)
+      setExpenseInput({
+        amount:'',
+        description:'',
+        category:','
+      })
     }
     else{
       let errMsg = `Can't add expense`
@@ -91,10 +125,30 @@ const Expenses = (props) => {
       alert(err)
     }
   };
+
   
+  const deleteHandler = async(id)=>{
+    const res = await fetch(`https://expense-tracker-7faf8-default-rtdb.firebaseio.com/expense${email}/${id}.json`,{
+      method:'delete'
+    })
+
+    if(res.ok){
+      alert('Expense deleted')
+      getData()
+      // console.log(res)
+    }
+    else{
+      alert('Unable to delete expense')
+    }
+  }
+  let expenses
   if(expensesData.length !== 0){
     expenses = expensesData.map((item)=>(
-     <ExpenseItems key={item[0]} amount={item[1].amount} description={item[1].description} category ={item[1].category} />
+     <ExpenseItems key={item[0]} amount={item[1].amount} description={item[1].description} category ={item[1].category}>
+      <button onClick={()=>editHandler(item[0])}>Edit</button>
+      <button onClick={()=>deleteHandler(item[0])}>Delete</button>
+     </ExpenseItems>
+     
    ))
   }
   
@@ -102,7 +156,7 @@ const Expenses = (props) => {
   return (
     <section className={classes["expenses-container"]}>
       <form onSubmit={submitHandler} className={classes["expenses-form"]}>
-        <span className={classes.heading}>Fill Expense Details</span>
+        <span className={classes.heading}>{!isEdit? 'Fill Expense Details':'Edit Expense Details'}</span>
         <label htmlFor="amount">Amount Spent</label>
         <input
           type="text"
@@ -132,7 +186,7 @@ const Expenses = (props) => {
           <option value="Enjoyment">Enjoyment</option>
         </select>
         <button className={classes["expenses-submit-btn"]}>
-          Submit<span> ▶</span>
+          {!isEdit?'Submit':'Edit'}<span> ▶</span>
         </button>
       </form>
       {expensesData.length>0 && <div className={classes['expenses-data-container']}>
