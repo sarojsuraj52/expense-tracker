@@ -1,7 +1,7 @@
-import React, { useState, useContext } from "react";
-// import { useHistory } from "react-router-dom";
+import React, { useState } from "react";
+import { useDispatch } from "react-redux";
+import { authActions } from "../../store/authReducer";
 import classes from "./Signup.module.css";
-import AuthContext from "../store/auth-context";
 
 const Signup = () => {
   const [input, setInput] = useState({
@@ -12,8 +12,7 @@ const Signup = () => {
   const [passwordMatched, setPasswordMatched] = useState(true);
   const [login, setLogin] = useState(true);
   const [isForgotPassword, setIsForgotPassword] = useState(false);
-  const authctx = useContext(AuthContext);
-  // const history = useHistory();
+  const dispatch = useDispatch()
 
   const toggleAuthMode = () => {
     setLogin((prevSate) => !prevSate);
@@ -89,7 +88,7 @@ const Signup = () => {
       const data = await res.json();
       if (res.ok) {
         if(login){
-          authctx.login(data.idToken,input.email);
+          dispatch(authActions.login({token:data.idToken, email:input.email}))
         }
         
         if(isForgotPassword){
@@ -112,16 +111,6 @@ const Signup = () => {
       }
     }
   };
-
-  // const res = await axios({
-  //     method:'post',
-  //     url:'https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=AIzaSyC54AeoVNHqweF0xmPJ4zAFA0N1EcBM_Gw',
-  //     data:{
-  //         email:input.email,
-  //         password:input.password,
-  //         returnSecureToken:true
-  //     }
-  // })
 
   return (
     <div className={classes["signup-container"]}>

@@ -1,10 +1,10 @@
-import React, { useState, useContext, useEffect, useCallback } from "react";
-import AuthContext from "../store/auth-context";
+import React, { useState, useEffect, useCallback } from "react";
+import { useSelector } from "react-redux";
 import classes from "./Home.module.css";
 
 const Home = () => {
   const [completeBtnClicked, setCompleteBtnCLicked] = useState(false);
-  const authctx = useContext(AuthContext);
+  const token = useSelector(state=>state.auth.token)
   const [initialData, SetInitialData] = useState("");
 
   const getData = useCallback(async () => {
@@ -13,7 +13,7 @@ const Home = () => {
       {
         method: "post",
         body: JSON.stringify({
-          idToken: authctx.token,
+          idToken: token,
         }),
         headers:{
           'Content-Type': 'application/json'
@@ -22,7 +22,7 @@ const Home = () => {
     );
     const data = await res.json();
     SetInitialData(data);
-  }, [authctx.token]);
+  }, [token]);
 
   useEffect(() => {
     getData();
@@ -74,7 +74,7 @@ const Home = () => {
       {
         method: "post",
         body: JSON.stringify({
-          idToken: authctx.token,
+          idToken: token,
           displayName: enteredFname,
           photoUrl: enteredPhotoUrl,
           returnSecureToken: false,
@@ -99,7 +99,7 @@ const Home = () => {
       method:'post',
       body:JSON.stringify({
         requestType:"VERIFY_EMAIL",
-        idToken:authctx.token
+        idToken:token
       }),
       headers:{
         'Content-Type': 'application/json'

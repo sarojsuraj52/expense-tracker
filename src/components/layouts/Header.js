@@ -1,14 +1,16 @@
 import { NavLink } from "react-router-dom";
-import { useContext } from "react";
+import { useSelector, useDispatch } from "react-redux";
 import classes from "./Header.module.css";
-import AuthContext from "../store/auth-context";
-const Header = () => {
-    const authctx = useContext(AuthContext)
-    const isLoggedin = authctx.isLoggedIn
+import { authActions } from "../../store/authReducer";
 
-    const logoutHandler = ()=>{
-        authctx.logout()
-    }
+const Header = () => {
+  const isLoggedin = useSelector((state) => state.auth.isLoggedIn);
+  const dispatch = useDispatch();
+  const totalAmount = useSelector(state=> state.expenses.totalAmount)
+
+  const logoutHandler = () => {
+    dispatch(authActions.logout());
+  };
   return (
     <header className={classes.header}>
       <ul>
@@ -24,8 +26,9 @@ const Header = () => {
         </li>
       </ul>
       <div className={classes.action}>
-        {!isLoggedin && <NavLink to='/auth'><button>Login</button></NavLink>}
-        {isLoggedin &&<button onClick={logoutHandler}>Logout</button>}
+        {/* {!isLoggedin && <NavLink to='/auth'><button>Login</button></NavLink>} */}
+        {totalAmount > 10000 && <button className={classes.premiumBtn}>Activate Premium</button>}
+        {isLoggedin && <button onClick={logoutHandler}>Logout</button>}
       </div>
     </header>
   );

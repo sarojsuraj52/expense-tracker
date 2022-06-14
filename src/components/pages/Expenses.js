@@ -1,21 +1,23 @@
-import React, { useState,useContext,useEffect,useCallback } from "react";
+import React, { useState,useEffect,useCallback } from "react";
 import ExpenseItems from "./ExpenseItems";
 import classes from "./Expenses.module.css";
-import AuthContext from "../store/auth-context";
+import { useSelector,useDispatch } from "react-redux";
+import { expensesAction } from "../../store/expensesReducer";
 const Expenses = (props) => {
   const [expenseInput, setExpenseInput] = useState({
     amount: "",
     description: "",
     category: "",
   });
-  const [expensesData,setExpensesData] = useState([])
   const [isEdit,setIsEdit]= useState(false)
   const [editId,setEditId] = useState('')
+  const dispatch = useDispatch()
+  const expenseData = useSelector(state=> state.expenses.expenses)
 
-  const authctx = useContext(AuthContext)
-  let email;
-  if (authctx.email !== null) {
-    email = authctx.email.replace(/[@.]/g, "");
+  let email = useSelector(state=> state.auth.email)
+
+  if (email !== null) {
+    email = email.replace(/[@.]/g, "");
   }
 
   const getData = useCallback(async()=>{
@@ -27,7 +29,9 @@ const Expenses = (props) => {
       if(data !== null){
         dataArr = Object.entries(data)
       }
-      setExpensesData(dataArr)
+      // setExpensesData(dataArr)
+      dispatch(expensesAction.addExpenses(dataArr))
+      dispatch(expensesAction.countTotal())
     }
     else{
       let errMsg = `Can't get expense`
@@ -40,7 +44,7 @@ const Expenses = (props) => {
     catch(err){
       alert(err)
     }
-  },[email])
+  },[email,dispatch])
 
   useEffect(()=>{
     getData()
@@ -59,16 +63,17 @@ const Expenses = (props) => {
   
   const editHandler = async(id)=>{
     setIsEdit(true)
-    let editData
-    if(expensesData.length !== 0){
-      editData = expensesData.find(item=>(item[0]===id))
+    let editItem
+    if(expenseData.length !== 0){
+      editItem = expenseData.find(item=>(item[0]===id))
     }
     setExpenseInput({
-      amount: editData[1].amount,
-      description: editData[1].description,
-      category: editData[1].category,
+      amount: editItem[1].amount,
+      description: editItem[1].description,
+      category: editItem[1].category,
     })
     setEditId(id)
+    dispatch(expensesAction.countTotal())
   }
 
   
@@ -124,8 +129,8 @@ const Expenses = (props) => {
     catch(err){
       alert(err)
     }
+    dispatch(expensesAction.countTotal())
   };
-
   
   const deleteHandler = async(id)=>{
     const res = await fetch(`https://expense-tracker-7faf8-default-rtdb.firebaseio.com/expense${email}/${id}.json`,{
@@ -135,15 +140,14 @@ const Expenses = (props) => {
     if(res.ok){
       alert('Expense deleted')
       getData()
-      // console.log(res)
     }
     else{
       alert('Unable to delete expense')
     }
   }
   let expenses
-  if(expensesData.length !== 0){
-    expenses = expensesData.map((item)=>(
+  if(expenseData.length !== 0){
+    expenses = expenseData.map((item)=>(
      <ExpenseItems key={item[0]} amount={item[1].amount} description={item[1].description} category ={item[1].category}>
       <button onClick={()=>editHandler(item[0])}>Edit</button>
       <button onClick={()=>deleteHandler(item[0])}>Delete</button>
@@ -164,6 +168,7 @@ const Expenses = (props) => {
           name="amount"
           value={expenseInput.amount}
           onChange={changeHandler}
+          required
         />
         <label htmlFor="description">Description</label>
         <textarea
@@ -171,6 +176,7 @@ const Expenses = (props) => {
           name="description"
           value={expenseInput.description}
           onChange={changeHandler}
+          required
         />
         <label htmlFor="category">Category</label>
         <select
@@ -178,6 +184,7 @@ const Expenses = (props) => {
           name="category"
           value={expenseInput.category}
           onChange={changeHandler}
+          required
         >
           <option value="" hidden></option>
           <option value="Food">Food</option>
@@ -189,7 +196,7 @@ const Expenses = (props) => {
           {!isEdit?'Submit':'Edit'}<span> ▶</span>
         </button>
       </form>
-      {expensesData.length>0 && <div className={classes['expenses-data-container']}>
+      {expenseData.length>0 && <div className={classes['expenses-data-container']}>
       {expenses}
       </div>}
     </section>
