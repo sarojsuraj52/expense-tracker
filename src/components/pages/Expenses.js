@@ -1,56 +1,59 @@
-import React, { useState,useEffect,useCallback } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import ExpenseItems from "./ExpenseItems";
 import classes from "./Expenses.module.css";
-import { useSelector,useDispatch } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { expensesAction } from "../../store/expensesReducer";
+import ReactToExcel from 'react-html-table-to-excel'
+
 const Expenses = (props) => {
   const [expenseInput, setExpenseInput] = useState({
     amount: "",
     description: "",
     category: "",
   });
-  const [isEdit,setIsEdit]= useState(false)
-  const [editId,setEditId] = useState('')
-  const dispatch = useDispatch()
-  const expenseData = useSelector(state=> state.expenses.expenses)
+  const [isEdit, setIsEdit] = useState(false);
+  const [editId, setEditId] = useState("");
+  const dispatch = useDispatch();
+  const expenseData = useSelector((state) => state.expenses.expenses);
+  const activatePremium = useSelector(state=> state.theme.activatePremium)
 
-  let email = useSelector(state=> state.auth.email)
+  let email = useSelector((state) => state.auth.email);
 
   if (email !== null) {
     email = email.replace(/[@.]/g, "");
   }
 
-  const getData = useCallback(async()=>{
-    try{const res = await fetch(`https://expense-tracker-7faf8-default-rtdb.firebaseio.com/expense${email}.json`)
-    
-    const data = await res.json()
-    if(res.ok){
-      let dataArr = []
-      if(data !== null){
-        dataArr = Object.entries(data)
-      }
-      // setExpensesData(dataArr)
-      dispatch(expensesAction.addExpenses(dataArr))
-      dispatch(expensesAction.countTotal())
-    }
-    else{
-      let errMsg = `Can't get expense`
-      if(data && data.error && data.error.message){
-        errMsg = data.error.message
-      }
-      throw new Error(errMsg)
-    }
-  }
-    catch(err){
-      alert(err)
-    }
-  },[email,dispatch])
+  const getData = useCallback(async () => {
+    try {
+      const res = await fetch(
+        `https://expense-tracker-7faf8-default-rtdb.firebaseio.com/expense${email}.json`
+      );
 
-  useEffect(()=>{
-    getData()
-  },[getData])
+      const data = await res.json();
+      if (res.ok) {
+        let dataArr = [];
+        if (data !== null) {
+          dataArr = Object.entries(data);
+        }
+        // setExpensesData(dataArr)
+        dispatch(expensesAction.addExpenses(dataArr));
+        dispatch(expensesAction.countTotal());
+      } else {
+        let errMsg = `Can't get expense`;
+        if (data && data.error && data.error.message) {
+          errMsg = data.error.message;
+        }
+        throw new Error(errMsg);
+      }
+    } catch (err) {
+      alert(err);
+    }
+  }, [email, dispatch]);
 
-  
+  useEffect(() => {
+    getData();
+  }, [getData]);
+
   const changeHandler = (e) => {
     const { name, value } = e.target;
     setExpenseInput((prevInput) => {
@@ -60,24 +63,23 @@ const Expenses = (props) => {
       };
     });
   };
-  
-  const editHandler = async(id)=>{
-    setIsEdit(true)
-    let editItem
-    if(expenseData.length !== 0){
-      editItem = expenseData.find(item=>(item[0]===id))
+
+  const editHandler = async (id) => {
+    setIsEdit(true);
+    let editItem;
+    if (expenseData.length !== 0) {
+      editItem = expenseData.find((item) => item[0] === id);
     }
     setExpenseInput({
       amount: editItem[1].amount,
       description: editItem[1].description,
       category: editItem[1].category,
-    })
-    setEditId(id)
-    dispatch(expensesAction.countTotal())
-  }
+    });
+    setEditId(id);
+    dispatch(expensesAction.countTotal());
+  };
 
-  
-  const submitHandler = async(e) => {
+  const submitHandler = async (e) => {
     e.preventDefault();
     const enteredExpenseData = {
       amount: expenseInput.amount,
@@ -85,82 +87,91 @@ const Expenses = (props) => {
       category: expenseInput.category,
     };
 
-
-    try{
-      let res,data;
-      if(isEdit === true){
-        res = await fetch(`https://expense-tracker-7faf8-default-rtdb.firebaseio.com/expense${email}/${editId}.json`,{
-          method:'put',
-          body:JSON.stringify(enteredExpenseData),
-          headers:{
-            'Content-Type':'application/json'
+    try {
+      let res, data;
+      if (isEdit === true) {
+        res = await fetch(
+          `https://expense-tracker-7faf8-default-rtdb.firebaseio.com/expense${email}/${editId}.json`,
+          {
+            method: "put",
+            body: JSON.stringify(enteredExpenseData),
+            headers: {
+              "Content-Type": "application/json",
+            },
           }
-        })
-      }
-      else{
-        res = await fetch(`https://expense-tracker-7faf8-default-rtdb.firebaseio.com/expense${email}.json`,{
-          method:'post',
-          body:JSON.stringify(enteredExpenseData),
-          headers:{
-            'Content-Type':'application/json'
+        );
+      } else {
+        res = await fetch(
+          `https://expense-tracker-7faf8-default-rtdb.firebaseio.com/expense${email}.json`,
+          {
+            method: "post",
+            body: JSON.stringify(enteredExpenseData),
+            headers: {
+              "Content-Type": "application/json",
+            },
           }
-        })
+        );
       }
-     data = await res.json()
+      data = await res.json();
 
-    if(res.ok){
-      alert(`${isEdit?'Expense Updated':'Expenses Added'}`)
-      getData()
-      setIsEdit(false)
-      setExpenseInput({
-        amount:'',
-        description:'',
-        category:','
-      })
-    }
-    else{
-      let errMsg = `Can't add expense`
-      if(data && data.error && data.error.message){
-        errMsg = data.error.message
+      if (res.ok) {
+        alert(`${isEdit ? "Expense Updated" : "Expenses Added"}`);
+        getData();
+        setIsEdit(false);
+        setExpenseInput({
+          amount: "",
+          description: "",
+          category: ",",
+        });
+      } else {
+        let errMsg = `Can't add expense`;
+        if (data && data.error && data.error.message) {
+          errMsg = data.error.message;
+        }
+        throw new Error(errMsg);
       }
-      throw new Error(errMsg)
+    } catch (err) {
+      alert(err);
     }
-  }
-    catch(err){
-      alert(err)
-    }
-    dispatch(expensesAction.countTotal())
+    dispatch(expensesAction.countTotal());
   };
-  
-  const deleteHandler = async(id)=>{
-    const res = await fetch(`https://expense-tracker-7faf8-default-rtdb.firebaseio.com/expense${email}/${id}.json`,{
-      method:'delete'
-    })
 
-    if(res.ok){
-      alert('Expense deleted')
-      getData()
+  const deleteHandler = async (id) => {
+    const res = await fetch(
+      `https://expense-tracker-7faf8-default-rtdb.firebaseio.com/expense${email}/${id}.json`,
+      {
+        method: "delete",
+      }
+    );
+
+    if (res.ok) {
+      alert("Expense deleted");
+      getData();
+    } else {
+      alert("Unable to delete expense");
     }
-    else{
-      alert('Unable to delete expense')
-    }
+  };
+  let expenses;
+  if (expenseData.length !== 0) {
+    expenses = expenseData.map((item) => (
+      <ExpenseItems
+        key={item[0]}
+        amount={item[1].amount}
+        description={item[1].description}
+        category={item[1].category}
+      >
+        <button onClick={() => editHandler(item[0])}>Edit</button>
+        <button onClick={() => deleteHandler(item[0])}>Delete</button>
+      </ExpenseItems>
+    ));
   }
-  let expenses
-  if(expenseData.length !== 0){
-    expenses = expenseData.map((item)=>(
-     <ExpenseItems key={item[0]} amount={item[1].amount} description={item[1].description} category ={item[1].category}>
-      <button onClick={()=>editHandler(item[0])}>Edit</button>
-      <button onClick={()=>deleteHandler(item[0])}>Delete</button>
-     </ExpenseItems>
-     
-   ))
-  }
-  
 
   return (
     <section className={classes["expenses-container"]}>
       <form onSubmit={submitHandler} className={classes["expenses-form"]}>
-        <span className={classes.heading}>{!isEdit? 'Fill Expense Details':'Edit Expense Details'}</span>
+        <span className={classes.heading}>
+          {!isEdit ? "Fill Expense Details" : "Edit Expense Details"}
+        </span>
         <label htmlFor="amount">Amount Spent</label>
         <input
           type="text"
@@ -193,11 +204,36 @@ const Expenses = (props) => {
           <option value="Enjoyment">Enjoyment</option>
         </select>
         <button className={classes["expenses-submit-btn"]}>
-          {!isEdit?'Submit':'Edit'}<span> ▶</span>
+          {!isEdit ? "Submit" : "Edit"}
+          <span> ▶</span>
         </button>
       </form>
-      {expenseData.length>0 && <div className={classes['expenses-data-container']}>
-      {expenses}
+      {expenseData.length > 0 && (
+        <div className={classes["expenses-data-container"]}>
+          <table className={classes.expenseTable} id='table-to-csv'>
+            <thead>
+              <tr>
+                <td>Amount</td>
+                <td>Description</td>
+                <td>Category</td>
+                <td>Action</td>
+              </tr>
+            </thead>
+            <tbody>
+            {expenses}
+            </tbody>
+          </table>
+        </div>
+      )}
+      {activatePremium &&<div>
+        {/* <button className={classes.downloadBtn}>Download CSV</button> */}
+        <ReactToExcel 
+        className={classes.downloadBtn}
+        table='table-to-csv'
+        filename='expenses'
+        sheet='sheet 1'
+        buttonText='Download CSV'
+        />
       </div>}
     </section>
   );

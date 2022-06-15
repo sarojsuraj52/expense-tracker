@@ -1,35 +1,14 @@
-.expense-li{
+.expense-tr{
     background-color: white;
-    display: flex;
-    align-items: center;
-    border-radius: 5px;
-    width: 100%;
-    margin: 0.3rem ;
-    justify-content: center;
-    word-wrap: break-word;
-    flex-wrap: wrap;
+    color: black;
 }
-.amount{
-    text-align: center;
-    width: 10%;
-    padding: 5px;
-}
-.description{
-    text-align: center;
-    width: 40%;
-    padding: 5px;
-}
-.category{
-    text-align: center;
-    width: 15%;
-    padding: 5px;
-}
+
 .btns{
     width: 25%;
 }
 .btns button{
-    padding: 7px 12px;
-    margin: 10px 3px;
+    padding: 5px 12px;
+    margin:8px 3px;
     color: white;
     border-radius: 5px;
     cursor: pointer;

@@ -8,8 +8,16 @@ import Home from "./components/pages/Home";
 import { useSelector } from "react-redux";
 
 function App() {
-
   const isLoggedin = useSelector((state) => state.auth.isLoggedIn);
+  const darkMode = useSelector((state) => state.theme.darkMode);
+  if (darkMode === true) {
+    document.body.style.backgroundColor = "black";
+    document.body.style.color = "white";
+  } else {
+    document.body.style.backgroundColor = "white";
+    document.body.style.color = "black";
+  }
+
   return (
     <>
       <Header />
